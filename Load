@@ -1,0 +1,49 @@
+•	Set up a basic PostgreSQL database instance either locally or on AWS RDS.
+For this task, I have a create a database with name mylocaldatabase on pgAdmin (PostgreSQL)
+
+
+•	Create a table with appropriate columns (id, house_no, city, state_code, zip_code, lat, lng, etc.) based on the transformed data from the CSV file.
+Now we will create a table. After the successful creation of database we go to the schemas and 
+then navigate to table in which we create a table with name addresses and then we add the column with following data.
+
+ID BIGINT PRIMARY KEY,
+HOUSE_NO CHARACTER VARYING,
+CITY CHARACTER VARYING,
+STATE_CODE CHARACTER VARYING,
+ZIP_CODE CHARACTER VARYING,
+LAT NUMERIC,
+LNG NUMERIC
+
+
+•	Write Python code to insert the cleaned data into the PostgreSQL table using SQL queries.
+CODE:
+import pandas as pd
+from sqlalchemy import create_engine
+csv_url = 'https://docs.google.com/spreadsheets/d/1ssqnH-kmM_VRnjxe7g601-jLBudqdgmxAQQTlDfFsp4/export?format=csv'
+data = pd.read_csv(csv_url)
+cleaned_data = data.dropna(subset=['address', 'lat', 'lng'])
+def extract_address_parts(address):
+    try:
+        parts = address.split(',')
+        house_no_street = parts[0].strip()
+        city = parts[1].strip()
+        state_zip = parts[2].strip().split(' ')
+        state_code = state_zip[0]
+        zip_code = state_zip[1]
+        return pd.Series([house_no_street, city, state_code, zip_code])
+    except:
+        return pd.Series([None, None, None, None])
+cleaned_data[['house_no', 'city', 'state_code', 'zip_code']] = cleaned_data['address'].apply(extract_address_parts)
+DATABASE_TYPE = 'postgresql'
+DBAPI = 'psycopg2'
+USER = 'myuser' 
+PASSWORD = 'mypassword'  
+HOST = 'localhost'
+PORT = 5432  
+DATABASE = 'mylocaldatabase'  
+connection_string = f'{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}'
+engine = create_engine(connection_string)
+cleaned_data[['house_no', 'city', 'state_code', 'zip_code', 'lat', 'lng']].to_sql('addresses', engine, if_exists='replace', index=False)
+print("Data inserted successfully into the PostgreSQL table!")
+
+
