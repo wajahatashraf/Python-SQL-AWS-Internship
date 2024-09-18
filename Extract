@@ -1,0 +1,7 @@
+Write a Python script to read and load the CSV file into memory.
+
+code:
+import pandas as pd
+csv_url = 'https://docs.google.com/spreadsheets/d/1ssqnH-kmM_VRnjxe7g601-jLBudqdgmxAQQTlDfFsp4/export?format=csv'
+data = pd.read_csv(csv_url)
+print(data.head())
