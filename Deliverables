@@ -1,0 +1,17 @@
+•	A Python script that performs the ETL process (Extract, Transform, Load).
+i have added all the code and script in folder with name Extract, Transform, Load.
+
+•	The SQL script used to create the PostgreSQL table.
+For the creation of PostgreSQL table, i open my pgADmin 4 and create a database. after that
+i move toward the schemas and then go toward the table in which i make the table with name addresses and add the column with therre desirable variable.
+
+•	A short write-up (1-2 paragraphs) explaining the decisions you made during the task (e.g., extracting state_code from address, any challenges faced).
+During the task of cleaning and transforming the CSV data, I focused on efficiently splitting the address field into distinct components—house_no, city, state_code, and zip_code. 
+This decision was made to standardize the data for easier querying and analysis, ensuring that each relevant part of the address was stored in its own column. 
+Extracting state_code and zip_code from a complex address string posed a challenge, particularly due to variability in address formats. 
+To overcome this, I used regular expressions and the Python split() function to reliably parse these elements from the address field.
+
+•	Clear instructions on how to run the script and connect to the PostgreSQL instance.
+Set Up PostgreSQL: Install, start, and create my database and table.
+Prepare Python Environment: Install necessary libraries and prepare my Python script.
+Run the Script: Execute the Python script to load and insert data into PostgreSQL.
