@@ -1,0 +1,80 @@
+•	Clean the data by removing any rows where address, lat, or lng are empty or null.
+CODE:
+import pandas as pd
+csv_url = 'https://docs.google.com/spreadsheets/d/1ssqnH-kmM_VRnjxe7g601-jLBudqdgmxAQQTlDfFsp4/export?format=csv'
+data = pd.read_csv(csv_url)
+cleaned_data = data.dropna(subset=['address', 'lat', 'lng'])
+print(cleaned_data.head())
+
+
+•	Create four new columns: house_no, city, state_code, and zip_code. Extract the relevant parts of the address (formatted as "house_no street_name, city, state_code zip_code country", e.g., "4910 Dressler Rd NW, Canton, OH 44718 USA") and copy them into the respective columns.
+CODE:
+import pandas as pd
+csv_url = 'https://docs.google.com/spreadsheets/d/1ssqnH-kmM_VRnjxe7g601-jLBudqdgmxAQQTlDfFsp4/export?format=csv'
+data = pd.read_csv(csv_url)
+cleaned_data = data.dropna(subset=['address', 'lat', 'lng'])
+def extract_address_parts(address):
+    try:
+        parts = address.split(',')
+        house_no_street = parts[0].strip()
+        city = parts[1].strip()
+        state_zip = parts[2].strip().split(' ')
+        state_code = state_zip[0]
+        zip_code = state_zip[1]
+        return pd.Series([house_no_street, city, state_code, zip_code])
+    except Exception as e:
+        return pd.Series([None, None, None, None]) 
+cleaned_data[['house_no', 'city', 'state_code', 'zip_code']] = cleaned_data['address'].apply(extract_address_parts)
+print(cleaned_data[['address', 'house_no', 'city', 'state_code', 'zip_code']].head())
+
+•	Sort the data by state_code and city.
+CODE:
+import pandas as pd
+csv_url = 'https://docs.google.com/spreadsheets/d/1ssqnH-kmM_VRnjxe7g601-jLBudqdgmxAQQTlDfFsp4/export?format=csv'
+data = pd.read_csv(csv_url)
+cleaned_data = data.dropna(subset=['address', 'lat', 'lng'])
+def extract_address_parts(address):
+    try:
+        parts = address.split(',')
+        house_no_street = parts[0].strip()
+        city = parts[1].strip()
+        state_zip = parts[2].strip().split(' ')
+        state_code = state_zip[0]
+        zip_code = state_zip[1]
+        return pd.Series([house_no_street, city, state_code, zip_code])
+    except Exception as e:
+        return pd.Series([None, None, None, None])
+cleaned_data[['house_no', 'city', 'state_code', 'zip_code']] = cleaned_data['address'].apply(extract_address_parts)
+sorted_data = cleaned_data.sort_values(by=['state_code', 'city'])
+print(sorted_data[['address', 'house_no', 'city', 'state_code', 'zip_code']].head())
+
+•	Convert the cleaned and transformed data into a format that can be uploaded to a PostgreSQL database (e.g., a Pandas DataFrame or list of dictionaries).
+CODE:
+import pandas as pd
+from sqlalchemy import create_engine
+csv_url = 'https://docs.google.com/spreadsheets/d/1ssqnH-kmM_VRnjxe7g601-jLBudqdgmxAQQTlDfFsp4/export?format=csv'
+data = pd.read_csv(csv_url)
+cleaned_data = data.dropna(subset=['address', 'lat', 'lng'])
+def extract_address_parts(address):
+    try:
+        parts = address.split(',')
+        house_no_street = parts[0].strip()
+        city = parts[1].strip()
+        state_zip = parts[2].strip().split(' ')
+        state_code = state_zip[0]
+        zip_code = state_zip[1]
+        return pd.Series([house_no_street, city, state_code, zip_code])
+    except:
+        return pd.Series([None, None, None, None])
+cleaned_data[['house_no', 'city', 'state_code', 'zip_code']] = cleaned_data['address'].apply(extract_address_parts)
+DATABASE_TYPE = 'postgresql'
+DBAPI = 'psycopg2'
+USER = 'myuser' 
+PASSWORD = 'mypassword'  
+HOST = 'localhost'
+PORT = 5432  
+DATABASE = 'mydatabase'  
+connection_string = f'{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}'
+engine = create_engine(connection_string)
+cleaned_data.to_sql('mytable', engine, if_exists='replace', index=False)
+print("Data uploaded successfully!")
